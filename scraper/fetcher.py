@@ -1,3 +1,4 @@
+# scraper/fetcher.py
 import logging
 import time
 from typing import List, Dict, Optional
@@ -9,8 +10,10 @@ from bs4 import BeautifulSoup
 
 class EventFetcher:
     """
-    config.TARGET_URLS にある {name, url, selector, [base_url]} を使って
-    各サイトからイベント情報を取得するクラス。
+    config.TARGET_URLS にある {name, url, selector, [base_url], [max_items], [link_must_include]}
+    を使って各サイトからイベント情報を取得するクラス。
+      - max_items: 取得件数の上限（例: 20）
+      - link_must_include: href またはテキストに含まれてほしい語の配列（例: ["팝업","popup"]）
     """
 
     def __init__(self):
@@ -36,12 +39,15 @@ class EventFetcher:
     def fetch_events_from_site(self, site: Dict) -> List[Dict]:
         """
         単一サイトからイベントを取得。
-        site: {"name": str, "url": str, "selector": str, "base_url": str(任意)}
+        site 必須: {"name": str, "url": str, "selector": str}
+        任意    : {"base_url": str, "max_items": int, "link_must_include": List[str]}
         """
         name = site["name"]
         url = site["url"]
         selector = site["selector"]
-        base_url = site.get("base_url")  # 無くてもOK
+        base_url = site.get("base_url")                 # 無くてもOK
+        max_items = site.get("max_items")               # 例: 20
+        must_include = site.get("link_must_include")    # 例: ["팝업","popup"]
 
         try:
             self.logger.info(f"Fetching: {name} - {url}")
@@ -51,13 +57,31 @@ class EventFetcher:
             soup = BeautifulSoup(resp.text, "html.parser")
             elements = soup.select(selector)
 
+            # --- ここでフィルタリング（必要な語を含むものだけ）---
+            if must_include:
+                filtered = []
+                for el in elements:
+                    # a要素（自分自身がaか、子にaを持つか）を取得
+                    link_el = el if el.name == "a" else el.select_one("a")
+                    href = (link_el.get("href") if link_el else "") or ""
+                    text = (link_el.get_text(" ", strip=True) if link_el else el.get_text(" ", strip=True)) or ""
+                    h_lower = href.lower()
+                    t_lower = text.lower()
+                    if any(k.lower() in h_lower or k.lower() in t_lower for k in must_include):
+                        filtered.append(el)
+                elements = filtered
+
+            # --- 取得件数の上限 ---
+            if isinstance(max_items, int) and max_items > 0:
+                elements = elements[:max_items]
+
             results: List[Dict] = []
             for el in elements:
                 item = self.extract_event_data(el, site, page_url=resp.url, base_url=base_url)
                 if item:
                     results.append(item)
 
-            self.logger.info(f"{name}: {len(results)} events found")
+            self.logger.info(f"{name}: {len(results)} events found (limit={max_items}, filter={bool(must_include)})")
             return results
 
         except Exception as e:
@@ -103,4 +127,5 @@ class EventFetcher:
         except Exception as e:
             self.logger.error(f"[{site['name']}] extract error: {e}")
             return None
+
 
