@@ -94,7 +94,10 @@ TARGET_URLS = [
         "name": "NAVER 検索：팝업스토어",
         "url": "https://search.naver.com/search.naver?query=%ED%8C%9D%EC%97%85%EC%8A%A4%ED%86%A0%EC%96%B4",
         "selector": "a",
-        "base_url": "https://search.naver.com"
+        "base_url": "https://search.naver.com",
+        "max_items": 20,                         # ★ 上位20件に制限
+        "link_must_include": ["팝업","popup"],   # ★ “팝업/popup” を含むリンク/テキストだけ通す
+
     },
 ]
 
