@@ -8,27 +8,26 @@ logger = logging.getLogger(__name__)
 def _normalize(s: str) -> str:
     if not s:
         return ""
-    # NFKCで幅や互換文字を正規化 → 小文字化 → 連続空白を1つに
-    s = unicodedata.normalize("NFKC", s)
-    s = s.lower().strip()
+    s = unicodedata.normalize("NFKC", s).lower().strip()
     s = " ".join(s.split())
     return s
 
-def is_interesting(event: Dict, keywords: List[str]) -> bool:
-    title = _normalize(event.get("title", ""))
-    content = _normalize(event.get("content", ""))
-    text = f"{title} {content}"
+class EventFilter:
+    def __init__(self, keywords: List[str]):
+        self.keywords = [_normalize(k) for k in keywords if k]
 
-    for kw in keywords:
-        nkw = _normalize(kw)
-        if not nkw:
-            continue
-        if nkw in text:
-            logger.debug(f"HIT: '{kw}' matched in '{event.get('title','')[:60]}'")
-            return True
-    return False
+    def is_interesting(self, event: Dict) -> bool:
+        title = _normalize(event.get("title", ""))
+        content = _normalize(event.get("content", ""))
+        text = f"{title} {content}".strip()
 
-def filter_events(events: List[Dict], keywords: List[str]) -> List[Dict]:
-    hit = [e for e in events if is_interesting(e, keywords)]
-    logger.info(f"Filtered {len(hit)} interesting events from {len(events)} total events")
-    return hit
+        for kw in self.keywords:
+            if kw and kw in text:
+                logger.debug(f"[HIT] kw='{kw}' title='{event.get('title','')[:60]}'")
+                return True
+        return False
+
+    def filter_events(self, events: List[Dict]) -> List[Dict]:
+        hits = [e for e in events if self.is_interesting(e)]
+        logger.info(f"Filtered {len(hits)} interesting events from {len(events)} total events")
+        return hits
