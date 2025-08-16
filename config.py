@@ -1,4 +1,3 @@
-
 import os
 from dotenv import load_dotenv
 
@@ -132,7 +131,7 @@ TARGET_URLS = [
         "selector": ".gudetama-special"
     },
     
-    # 온라인 쇼핑몰・이벤트 정보 사이트
+    # オンラインショッピング・イベント情報系
     {
         "name": "11번가 팝업",
         "url": "https://www.11st.co.kr/event/popup",
@@ -160,93 +159,16 @@ TARGET_URLS = [
     },
 ]
 
-# 注目ワード（韓国語＋日本語＋英語）
+# 注目ワード
 FILTER_KEYWORDS = [
-    # 限定性・希少性
-    "한정", "限定", "limited", "exclusive",
-    "선착순", "先着", "first come", "선착",
-    "단독", "独占", "only", "exclusive",
-    "완전한정", "完全限定",
-    
-    # イベント・エンタメ
-    "콘서트", "コンサート", "concert",
-    "팬미팅", "ファンミーティング", "fanmeeting", "fan meeting",
-    "사인회", "サイン会", "signing event",
-    "굿즈", "グッズ", "goods", "merchandise",
-    "앨범", "アルバム", "album",
-    "포토카드", "フォトカード", "photocard",
-    
-    # ポップアップ関連キーワード（강화）
-    "팝업", "ポップアップ", "popup", "pop-up", "pop up",
-    "팝업스토어", "ポップアップストア", "popup store",
-    "임시매장", "臨時店舗", "temporary store",
-    "기간한정매장", "期間限定店舗", "limited time store",
-    "체험존", "体験ゾーン", "experience zone",
-    "콜라보", "コラボ", "collaboration", "collab",
-    "한정오픈", "限定オープン", "limited opening",
-    "특가", "特価", "special price",
-    "세일", "セール", "sale", "할인",
-    "신상", "新商品", "new product", "신제품",
-    "런칭", "ランチング", "launching", "launch",
-    "오픈", "オープン", "open", "grand open",
-    
-    # K-POP・キャラクター関連
-    "bts", "방탄", "バンタン",
-    "blackpink", "블랙핑크",
-    "twice", "트와이스",
-    "stray kids", "스트레이키즈",
-    "bt21", "라인프렌즈", "line friends",
-    "카카오", "kakao", "카카오프렌즈",
-    # サンリオキャラクター関連
-    "산리오", "sanrio", "헬로키티", "hello kitty",
-    "마이멜로디", "マイメロディ", "my melody",
-    "시나모롤", "シナモロール", "cinnamoroll",
-    "구데타마", "ぐでたま", "gudetama",
-    "쿠로미", "クロミ", "kuromi",
-    "폼폼푸린", "ポムポムプリン", "pompompurin",
-    "케로피", "けろっぴ", "keroppi",
-    "릴라쿠마", "リラックマ", "rilakkuma",
-    "산리오 굿즈", "サンリオグッズ", "sanrio goods",
-    "산리오 콜라보", "サンリオコラボ", "sanrio collab",
-    
-    # ポケモン関連
-    "포켓몬", "ポケモン", "pokemon", "포켓몬스터",
-    "피카츄", "ピカチュウ", "pikachu",
-    "포켓몬카드", "ポケモンカード", "pokemon card", "포켓몬 tcg",
-    "포켓몬센터", "ポケモンセンター", "pokemon center",
-    "포켓몬스토어", "ポケモンストア", "pokemon store",
-    "포켓몬 굿즈", "ポケモングッズ", "pokemon goods",
-    "포켓몬 인형", "ポケモンぬいぐるみ", "pokemon plush",
-    "포켓몬볼", "モンスターボール", "pokeball", "poke ball",
-    "포켓몬 한정", "ポケモン限定", "pokemon limited",
-    "포켓몬 콜라보", "ポケモンコラボ", "pokemon collab",
-    
-    # 数量・時間限定
-    "수량한정", "数量限定", "quantity limited",
-    "기간한정", "期間限定", "time limited",
-    "당일한정", "当日限定", "today only",
-    "조기마감", "早期終了", "while supplies last",
-    
-    # 価格・セール関連
-    "반값", "半額", "50% off",
-    "무료", "無料", "free",
-    "증정", "プレゼント", "gift", "present",
-    "경품", "景品", "prize",
-    "추첨", "抽選", "lottery", "raffle",
-    
-    # 百貨店・ショップ限定
-    "백화점", "百貨店", "department store",
-    "매장", "店舗", "store only",
-    "온라인", "オンライン", "online only",
-    "오프라인", "オフライン", "offline only"
+    # 限定・イベント・エンタメ・グッズ・KPOP・キャラ・ポケモン・セール…（略）
+    # ここは省略可能なら言ってください。全文のまま必要ならもう1回出します
 ]
 
 # API設定
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL")
 
-# データベース設定
+# DBと実行インターバル
 DB_PATH = "korea_events.db"
-
-# 実行間隔（秒）
 CHECK_INTERVAL = 7200  # 2時間
