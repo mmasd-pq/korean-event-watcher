@@ -1,4 +1,4 @@
-# config.py - 修正版
+# config.py - 修正完全版
 import os
 
 # === API Keys ===
@@ -8,54 +8,60 @@ SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
 # === Database ===
 DB_PATH = "data/events.db"
 
+# === 実行間隔設定 (main.pyで必要) ===
+CHECK_INTERVAL = 7200  # 2時間 = 7200秒
+
 # === Scraping Settings ===
 DEFAULT_DELAY = 2.0  # サイト間の待機時間（秒）
 REQUEST_TIMEOUT = 15
 MAX_RETRIES = 3
 
+# === User Agent設定 ===
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
 # === Target URLs (修正版) ===
 TARGET_URLS = [
-    # --- 映画館 (問題があったので修正) ---
+    # --- 映画館 ---
     {
         "name": "MEGABOX イベント",
         "url": "https://www.megabox.co.kr/event",
-        # 修正: より広範囲でイベントリンクを捕捉
         "selector": "a[href*='/event/'], .event a, .list a",
         "base_url": "https://www.megabox.co.kr",
         "max_items": 20,
-        "delay": 3.0,  # 少し長めの待機
-        "requires_js": False
+        "delay": 3.0,
+        "requires_js": False,
+        "enabled": True
     },
     {
         "name": "CGV イベント", 
         "url": "https://www.cgv.co.kr/culture-event/event/",
-        # JavaScript動的サイトのため、一旦無効化
-        "selector": "a",
+        "selector": ".event-list a, .list a, a[href*='/event/']",
         "base_url": "https://www.cgv.co.kr", 
         "max_items": 10,
         "delay": 3.0,
-        "requires_js": True,  # JavaScript必須フラグ
-        "enabled": False      # 一旦無効化
+        "requires_js": True,
+        "enabled": False  # JavaScript必須のため一旦無効化
     },
     {
         "name": "LOTTE CINEMA イベント",
         "url": "https://www.lottecinema.co.kr/LCWS/Event/EventList.aspx",
-        "selector": "a",
+        "selector": ".event-item a, .list a, a[href*='/Event/']",
         "base_url": "https://www.lottecinema.co.kr",
         "max_items": 10, 
         "delay": 3.0,
         "requires_js": True,
-        "enabled": False      # 一旦無効化
+        "enabled": False  # JavaScript必須のため一旦無効化
     },
 
-    # --- K-POP/事務所 (これらは動作していたので維持) ---
+    # --- K-POP/エンタメ系 ---
     {
         "name": "HYBE Press（英語）",
         "url": "https://hybecorp.com/eng/news/news",
         "selector": ".news_list li a, .list li a, a[href*='/eng/news/news/']",
         "base_url": "https://hybecorp.com",
         "max_items": 30,
-        "delay": 2.0
+        "delay": 2.0,
+        "enabled": True
     },
     {
         "name": "HYBE Notice（英語）", 
@@ -63,40 +69,37 @@ TARGET_URLS = [
         "selector": ".news_list li a, .list li a, a[href*='/eng/news/notice/']",
         "base_url": "https://hybecorp.com",
         "max_items": 30,
-        "delay": 2.0
+        "delay": 2.0,
+        "enabled": True
     },
-    # SM Entertainment は404エラーのため一旦コメントアウト
-    # {
-    #     "name": "SM Entertainment NEWS",
-    #     "url": "https://www.smentertainment.com/News", 
-    #     "selector": ".news_list li a, .list li a, a[href*='/News/']",
-    #     "base_url": "https://www.smentertainment.com"
-    # },
     {
         "name": "YG Entertainment NOTICE（英語）",
         "url": "https://ygfamily.com/en/news/notice", 
         "selector": ".board-list a, .notice-list a, a[href*='/en/news/notice/']",
         "base_url": "https://ygfamily.com",
         "max_items": 20,
-        "delay": 2.0
+        "delay": 2.0,
+        "enabled": True
     },
 
     # --- キャラクター系 ---
     {
         "name": "Pokemon Korea ニュース",
         "url": "https://pokemonkorea.co.kr/news",
-        "selector": ".news-list a, .news_item a, a[href*='/news/'], a", # より広範囲に
+        "selector": ".news-list a, .news_item a, a[href*='/news/']",
         "base_url": "https://pokemonkorea.co.kr",
         "max_items": 15,
-        "delay": 2.0
+        "delay": 2.0,
+        "enabled": True
     },
     {
         "name": "BT21 公式 NOTICE",
         "url": "https://www.bt21.com/notice",
-        "selector": ".notice a, .list a, a[href*='/notice'], a", # より広範囲に
+        "selector": ".notice a, .list a, a[href*='/notice']",
         "base_url": "https://www.bt21.com", 
         "max_items": 15,
-        "delay": 2.0
+        "delay": 2.0,
+        "enabled": True
     },
     {
         "name": "LINE FRIENDS SQUARE（イベント系ブログ）",
@@ -104,56 +107,71 @@ TARGET_URLS = [
         "selector": "article a, .card a, a[href*='/blogs/event/']",
         "base_url": "https://linefriendssquare.com",
         "max_items": 20,
-        "delay": 2.0
+        "delay": 2.0,
+        "enabled": True
     },
 
     # --- 大型モール ---
     {
         "name": "IFC Mall Seoul - NOW（英語）",
         "url": "https://www.ifcmallseoul.com/eng/now",
-        "selector": "a, .list a, .now a",
+        "selector": "a[href*='/now/'], .now a, .list a",
         "base_url": "https://www.ifcmallseoul.com",
-        "max_items": 50,  # 多めに取得していたので調整
-        "delay": 2.0
+        "max_items": 25,
+        "delay": 2.0,
+        "enabled": True
     },
 
-    # --- 公的ポータル ---
+    # --- 観光・公式サイト ---
     {
         "name": "VisitSeoul - Festivals & Events（英語）",
         "url": "https://english.visitseoul.net/events",
         "selector": ".event_list a, .list a, a[href*='/events/']",
         "base_url": "https://english.visitseoul.net",
         "max_items": 15,
-        "delay": 2.0
-    },
-
-    # --- 横断検索 (これは動作していた) ---
-    {
-        "name": "NAVER 検索：팝업스토어", 
-        "url": "https://search.naver.com/search.naver?query=%ED%8C%9D%EC%97%85%EC%8A%A4%ED%86%A0%EC%96%B4",
-        "selector": "a",
-        "base_url": "https://search.naver.com",
-        "max_items": 20,
-        "link_must_include": ["팝업","popup"],
-        "delay": 3.0  # NAVERは少し慎重に
-    },
-
-    # === 追加候補サイト ===
-    {
-        "name": "Seoul ポップアップストア情報",
-        "url": "https://korean.visitseoul.net/things-to-do/popup-stores",
-        "selector": "a[href*='popup'], .popup a, a",
-        "base_url": "https://korean.visitseoul.net", 
-        "max_items": 10,
-        "delay": 2.0
+        "delay": 2.0,
+        "enabled": True
     },
     {
         "name": "韓国観光公社 イベント",
         "url": "https://korean.visitkorea.or.kr/list/fes_list.do",
-        "selector": ".event a, .list a, a[href*='event'], a",
+        "selector": ".event a, .list a, a[href*='event']",
         "base_url": "https://korean.visitkorea.or.kr",
         "max_items": 15, 
-        "delay": 2.0
+        "delay": 2.0,
+        "enabled": True
+    },
+
+    # --- 検索エンジン活用 ---
+    {
+        "name": "NAVER 検索：팝업스토어", 
+        "url": "https://search.naver.com/search.naver?query=%ED%8C%9D%EC%97%85%EC%8A%A4%ED%86%A0%EC%96%B4",
+        "selector": ".news_tit, .api_txt_lines, a[href*='blog'], a[href*='news']",
+        "base_url": "https://search.naver.com",
+        "max_items": 20,
+        "link_must_include": ["팝업","popup"],
+        "delay": 3.0,
+        "enabled": True
+    },
+
+    # --- 百貨店系（追加） ---
+    {
+        "name": "롯데백화점 이벤트",
+        "url": "https://www.lotteshopping.com/event/eventList",
+        "selector": ".event-item a, .list a, a[href*='/event/']",
+        "base_url": "https://www.lotteshopping.com",
+        "max_items": 20,
+        "delay": 3.0,
+        "enabled": True
+    },
+    {
+        "name": "신세계백화점 이벤트",
+        "url": "https://www.shinsegae.com/event/list.do",
+        "selector": ".event a, .list a, a[href*='/event/']",
+        "base_url": "https://www.shinsegae.com",
+        "max_items": 20,
+        "delay": 3.0,
+        "enabled": True
     }
 ]
 
@@ -164,40 +182,81 @@ TARGET_URLS = [site for site in TARGET_URLS if site.get("enabled", True)]
 FILTER_KEYWORDS = [
     # 限定・希少
     "한정","限定","limited","exclusive",
-    "선착","先着","first come",
+    "선착","先착","first come",
     "단독","独占","only",
+    "수량한정","数量限定","limited quantity",
+    "기간한정","期間限定","limited time",
 
     # ポップアップ/コラボ
     "팝업","ポップアップ","popup","pop-up",
     "팝업스토어","ポップアップストア","popup store",
     "콜라보","コラボ","collaboration","collab",
+    "특별","特別","special",
 
     # K-POP/グッズ
     "콘서트","コンサート","concert",
-    "팬미팅","ファンミーティング","fanmeeting",
-    "사인회","サイン会","signing",
-    "굿즈","グッズ","merch","goods",
+    "팬미팅","ファンミーティング","fanmeeting","fan meeting",
+    "사인회","サイン会","signing","autograph",
+    "굿즈","グッズ","merch","goods","merchandise",
     "앨범","アルバム","album",
-    "포토카드","フォトカード","photocard",
+    "포토카드","フォトカード","photocard","pc",
 
-    # ポケモン・キャラ
-    "포켓몬","ポケモン","pokemon","피카츄","ピカチュウ",
+    # キャラクター系
+    "포켓몬","ポケモン","pokemon","피카츄","ピカチュウ","pikachu",
     "bt21","라인프렌즈","line friends","카카오프렌즈","kakao friends",
-    "산리오","サンリオ","sanrio",
+    "산리오","サンリオ","sanrio","hello kitty","헬로키티",
 
-    # 数量・期間
-    "수량한정","数量限定","기간한정","期間限定","조기마감","早期終了",
-    
-    # 新規追加: より一般的なワード
-    "이벤트","event","특가","sale","할인","discount","신제품","new"
+    # 販売・イベント
+    "이벤트","event","특가","sale","할인","discount",
+    "신제품","new","launch","런칭","출시",
+    "선물","プレゼント","gift","present",
+    "추첨","抽選","lottery","응모","応募",
+
+    # 期間・数量
+    "조기마감","早期終了","early bird",
+    "당일","当日","today only",
+    "주말","週末","weekend",
+    "예약","予約","reservation","booking",
+
+    # ブランド系
+    "bts","방탄소년단","블랙핑크","blackpink","아이브","ive",
+    "뉴진스","newjeans","르세라핌","le sserafim"
+]
+
+# === 除外キーワード（ノイズ除去用） ===
+EXCLUDE_KEYWORDS = [
+    "광고","advertisement","ad",
+    "스팸","spam",
+    "성인","adult","19+",
+    "도박","gambling","베팅","betting"
 ]
 
 # === 通知設定 ===
 NOTIFICATION_ENABLED = True
-SLACK_ENABLED = bool(SLACK_WEBHOOK_URL)
+SLACK_ENABLED = bool(SLACK_WEBHOOK_URL and SLACK_WEBHOOK_URL != "")
 PRINT_ENABLED = True
+
+# === ChatGPT API設定 ===
+OPENAI_MODEL = "gpt-3.5-turbo"
+OPENAI_MAX_TOKENS = 500
+OPENAI_TEMPERATURE = 0.3
 
 # === ログ設定 ===
 LOG_LEVEL = "INFO"
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+LOG_FILE = "logs/korean_event_watcher.log"
+
+# === その他の設定 ===
+# データベース関連
+DB_BACKUP_DAYS = 30  # 30日以上古いデータは削除
+MAX_DB_SIZE_MB = 100  # DBサイズ上限
+
+# スクレイピング関連
+CONCURRENT_REQUESTS = 3  # 同時リクエスト数
+RETRY_DELAY = 5  # リトライ間隔（秒）
+
+# 翻訳関連
+TRANSLATE_TO_JAPANESE = True
+SUMMARIZE_CONTENT = True
+MAX_SUMMARY_LENGTH = 200  # 要約の最大文字数
 
