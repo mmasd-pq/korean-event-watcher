@@ -1,174 +1,137 @@
+# config.py  — 2025-08-16 確認版（実在URLに絞り込み）
 import os
 from dotenv import load_dotenv
-
 load_dotenv()
 
-# 監視対象URL群（韓国の百貨店・キャラクターショップ・K-POP公式サイト）
+# === 監視対象URL（まずは堅い面子に厳選） ===
 TARGET_URLS = [
-    # 百貨店・ショッピングモール
+    # --- 映画館（イベント告知が安定して掲載される） ---
     {
-        "name": "현대백화점 (現代百貨店)",
-        "url": "https://www.ehyundai.com/newPortal/DP/DPHP004_V.do",
-        "selector": ".event-list .event-item"
-    },
-    {
-        "name": "롯데백화점 (ロッテ百貨店)",
-        "url": "https://www.lotteshopping.com/event/list",
-        "selector": ".event-card"
-    },
-    {
-        "name": "신세계백화점 (新世界百貨店)",
-        "url": "https://www.shinsegae.com/event/list",
-        "selector": ".event-item"
-    },
-    
-    # ポップアップ専門・イベントスペース
-    {
-        "name": "더현대 서울 (The Hyundai Seoul)",
-        "url": "https://www.thehyundai.com/event/popup",
-        "selector": ".popup-event"
-    },
-    {
-        "name": "성수동 팝업스토어",
-        "url": "https://seongsu-popup.com/events",
-        "selector": ".popup-list"
-    },
-    {
-        "name": "홍대 팝업스트리트",
-        "url": "https://hongdae-popup.com/store-list",
-        "selector": ".store-item"
-    },
-    
-    # K-POP・エンタメ関連
-    {
-        "name": "하이브 인사이트 (HYBE Insight)",
-        "url": "https://hybecorp.com/event",
-        "selector": ".event-content"
-    },
-    {
-        "name": "SM 타운 (SM Town)",
-        "url": "https://smtown.com/event/popup",
-        "selector": ".popup-event"
-    },
-    {
-        "name": "JYP 스토어 (JYP Store)",
-        "url": "https://jypstore.com/popup",
-        "selector": ".event-section"
-    },
-    {
-        "name": "YG 엔터테인먼트 (YG Entertainment)",
-        "url": "https://www.ygfamily.com/event/list",
-        "selector": ".yg-event"
-    },
-    {
-        "name": "YG 셀렉트 (YG SELECT)",
-        "url": "https://ygselect.com/kr/event",
-        "selector": ".select-event"
-    },
-    
-    # キャラクター・ブランド
-    {
-        "name": "BT21 공식스토어",
-        "url": "https://bt21.com/event",
-        "selector": ".event-section"
-    },
-    {
-        "name": "라인프렌즈 (LINE Friends)",
-        "url": "https://linefriends.com/kr/event/popup",
-        "selector": ".popup-item"
-    },
-    {
-        "name": "카카오프렌즈 (Kakao Friends)",
-        "url": "https://kakaofriends.com/kr/event",
-        "selector": ".event-card"
-    },
-    # ポケモン関連サイト
-    {
-        "name": "포켓몬 코리아 공식 (Pokemon Korea Official)",
-        "url": "https://pokemonkorea.co.kr/news/event",
-        "selector": ".event-list .event-item"
-    },
-    {
-        "name": "포켓몬 카드 게임 (Pokemon TCG Korea)",
-        "url": "https://pokemon-tcg.co.kr/news",
-        "selector": ".news-item"
-    },
-    {
-        "name": "포켓몬 GO 코리아",
-        "url": "https://pokemongo.co.kr/event",
-        "selector": ".event-content"
-    },
-    {
-        "name": "포켓몬 센터 온라인",
-        "url": "https://pokemoncenter-online.com/kr/event",
-        "selector": ".center-event"
-    },
-    
-    # サンリオ関連サイト
-    {
-        "name": "산리오 코리아 공식 (Sanrio Korea Official)",
-        "url": "https://sanrio.co.kr/event",
-        "selector": ".sanrio-event"
-    },
-    {
-        "name": "헬로키티 코리아 (Hello Kitty Korea)",
-        "url": "https://hellokitty.co.kr/event/special",
-        "selector": ".kitty-special"
-    },
-    {
-        "name": "마이멜로디 코리아",
-        "url": "https://mymelody.co.kr/news/event",
-        "selector": ".melody-event"
-    },
-    {
-        "name": "시나모롤 코리아 (Cinnamoroll Korea)",
-        "url": "https://cinnamoroll.co.kr/event",
-        "selector": ".cinnamon-event"
-    },
-    {
-        "name": "구데타마 코리아 (Gudetama Korea)",
-        "url": "https://gudetama.co.kr/special",
-        "selector": ".gudetama-special"
-    },
-    
-    # オンラインショッピング・イベント情報系
-    {
-        "name": "11번가 팝업",
-        "url": "https://www.11st.co.kr/event/popup",
-        "selector": ".popup-list"
-    },
-    {
-        "name": "쿠팡 이벤트",
-        "url": "https://www.coupang.com/np/campaigns/popup",
-        "selector": ".event-item"
-    },
-    {
-        "name": "롯데시네마 (LOTTE CINEMA)",
-        "url": "https://www.lottecinema.co.kr/LCWS/Event/EventList.aspx",
-        "selector": ".event-item"
-    },
-    {
-        "name": "CGV 시네마",
-        "url": "https://www.cgv.co.kr/culture-event/event/",
-        "selector": ".event-list-item"
-    },
-    {
-        "name": "메가박스 (MEGABOX)",
+        "name": "MEGABOX イベント",
         "url": "https://www.megabox.co.kr/event",
-        "selector": ".event-box"
+        # イベント一覧→各詳細へのリンクが <a href="/event/detail?...">
+        "selector": "a[href*='/event/detail']",
+        "base_url": "https://www.megabox.co.kr"
+    },
+    {
+        "name": "CGV イベント",
+        "url": "https://www.cgv.co.kr/culture-event/event/",
+        # リストの HTML はたびたび変わるので a を広めに
+        "selector": "a[href*='/culture-event/event/'], a[href*='detailViewUnited.aspx']",
+        "base_url": "https://www.cgv.co.kr"
+    },
+    {
+        "name": "LOTTE CINEMA イベント",
+        "url": "https://www.lottecinema.co.kr/LCWS/Event/EventList.aspx",
+        "selector": "a[href*='EventDetail'], .event-item a",
+        "base_url": "https://www.lottecinema.co.kr"
+    },
+
+    # --- K-POP/事務所ニュース・お知らせ ---
+    {
+        "name": "HYBE Press（英語）",
+        "url": "https://hybecorp.com/eng/news/news",
+        "selector": ".news_list li a, .list li a, a[href*='/eng/news/news/']",
+        "base_url": "https://hybecorp.com"
+    },
+    {
+        "name": "HYBE Notice（英語）",
+        "url": "https://hybecorp.com/eng/news/notice",
+        "selector": ".news_list li a, .list li a, a[href*='/eng/news/notice/']",
+        "base_url": "https://hybecorp.com"
+    },
+    {
+        "name": "SM Entertainment NEWS",
+        "url": "https://www.smentertainment.com/News",
+        "selector": ".news_list li a, .list li a, a[href*='/News/']",
+        "base_url": "https://www.smentertainment.com"
+    },
+    {
+        "name": "YG Entertainment NOTICE（英語）",
+        "url": "https://ygfamily.com/en/news/notice",
+        "selector": ".board-list a, .notice-list a, a[href*='/en/news/notice/']",
+        "base_url": "https://ygfamily.com"
+    },
+
+    # --- キャラクター/ポップアップ系（公式の告知面） ---
+    {
+        "name": "Pokemon Korea ニュース",
+        "url": "https://pokemonkorea.co.kr/news",
+        "selector": ".news-list a, .news_item a, a[href*='/news/']",
+        "base_url": "https://pokemonkorea.co.kr"
+    },
+    {
+        "name": "BT21 公式 NOTICE",
+        "url": "https://www.bt21.com/notice",
+        "selector": ".notice a, .list a, a[href*='/notice']",
+        "base_url": "https://www.bt21.com"
+    },
+    {
+        "name": "LINE FRIENDS SQUARE（イベント系ブログ）",
+        "url": "https://linefriendssquare.com/en/blogs/event",
+        "selector": "article a, .card a, a[href*='/blogs/event/']",
+        "base_url": "https://linefriendssquare.com"
+    },
+
+    # --- 大型モール（“NOW/NEWS/WHAT’S ON”にイベント掲載） ---
+    {
+        "name": "IFC Mall Seoul - NOW（英語）",
+        "url": "https://www.ifcmallseoul.com/eng/now",
+        "selector": "a, .list a, .now a",
+        "base_url": "https://www.ifcmallseoul.com"
+    },
+
+    # --- 公的ポータル（イベント集約・拾い漏れの保険） ---
+    {
+        "name": "VisitSeoul - Festivals & Events（英語）",
+        "url": "https://english.visitseoul.net/events",
+        "selector": ".event_list a, .list a, a[href*='/events/']",
+        "base_url": "https://english.visitseoul.net"
+    },
+
+    # --- 横断検索（Naver 検索結果。HTML出力が安定しやすい） ---
+    {
+        "name": "NAVER 検索：팝업스토어",
+        "url": "https://search.naver.com/search.naver?query=%ED%8C%9D%EC%97%85%EC%8A%A4%ED%86%A0%EC%96%B4",
+        "selector": "a",
+        "base_url": "https://search.naver.com"
     },
 ]
 
-# 注目ワード
+# === 注目ワード ===
 FILTER_KEYWORDS = [
-    # 限定・イベント・エンタメ・グッズ・KPOP・キャラ・ポケモン・セール…（略）
-    # ここは省略可能なら言ってください。全文のまま必要ならもう1回出します
+    # 限定・希少
+    "한정","限定","limited","exclusive",
+    "선착","先着","first come",
+    "단독","独占","only",
+
+    # ポップアップ/コラボ
+    "팝업","ポップアップ","popup","pop-up",
+    "팝업스토어","ポップアップストア","popup store",
+    "콜라보","コラボ","collaboration","collab",
+
+    # K-POP/グッズ
+    "콘서트","コンサート","concert",
+    "팬미팅","ファンミーティング","fanmeeting",
+    "사인회","サイン会","signing",
+    "굿즈","グッズ","merch","goods",
+    "앨범","アルバム","album",
+    "포토카드","フォトカード","photocard",
+
+    # ポケモン・キャラ
+    "포켓몬","ポケモン","pokemon","피카츄","ピカチュウ",
+    "bt21","라인프렌즈","line friends","카카오프렌즈","kakao friends",
+    "산리오","サンリオ","sanrio",
+
+    # 数量・期間
+    "수량한정","数量限定","기간한정","期間限定","조기마감","早期終了",
 ]
 
-# API設定
+# API/通知
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL")
 
-# DBと実行インターバル
+# DB/実行間隔
 DB_PATH = "korea_events.db"
 CHECK_INTERVAL = 7200  # 2時間
+
