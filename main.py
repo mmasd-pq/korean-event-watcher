@@ -1,8 +1,9 @@
 import time
 import logging
+import sys
 from typing import List, Dict
 
-# 各モジュールのインポート（実際の実装では相対インポートを使用）
+# 各モジュールのインポート
 from config import TARGET_URLS, FILTER_KEYWORDS, OPENAI_API_KEY, SLACK_WEBHOOK_URL, DB_PATH, CHECK_INTERVAL
 from utils.logger import setup_logger
 from scraper.fetcher import EventFetcher
@@ -10,6 +11,7 @@ from processor.filter import EventFilter
 from processor.translator import EventTranslator
 from db.store import EventStore
 from notifier.slack import EventNotifier
+
 
 class KoreaEventBot:
     def __init__(self):
@@ -88,19 +90,19 @@ class KoreaEventBot:
                 self.logger.info("Continuing after error...")
                 time.sleep(60)  # エラー後は1分待機
 
+
 def main():
     """メイン関数"""
     bot = KoreaEventBot()
     
     # 引数に応じて実行モードを切り替え
-    import sys
-    
     if len(sys.argv) > 1 and sys.argv[1] == "--once":
         # 1回だけ実行
         bot.run_single_check()
     else:
         # 継続実行
         bot.run_continuous()
+
 
 if __name__ == "__main__":
     main()
