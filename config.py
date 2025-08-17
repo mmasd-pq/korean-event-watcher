@@ -6,7 +6,15 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "your-openai-key")
 SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
 
 # === Database ===
-DB_PATH = "data/events.db"
+# プロジェクトのルートディレクトリを取得
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+
+# dataディレクトリが存在しない場合は作成
+os.makedirs(DATA_DIR, exist_ok=True)
+
+# データベースファイルのパス
+DB_PATH = os.path.join(DATA_DIR, "events.db")
 
 # === 実行間隔設定 (main.pyで必要) ===
 CHECK_INTERVAL = 7200  # 2時間 = 7200秒
@@ -182,7 +190,7 @@ TARGET_URLS = [site for site in TARGET_URLS if site.get("enabled", True)]
 FILTER_KEYWORDS = [
     # 限定・希少
     "한정","限定","limited","exclusive",
-    "선착","先착","first come",
+    "선착","先着","first come",
     "단독","独占","only",
     "수량한정","数量限定","limited quantity",
     "기간한정","期間限定","limited time",
@@ -244,7 +252,11 @@ OPENAI_TEMPERATURE = 0.3
 # === ログ設定 ===
 LOG_LEVEL = "INFO"
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-LOG_FILE = "logs/korean_event_watcher.log"
+
+# ログディレクトリも自動作成
+LOGS_DIR = os.path.join(BASE_DIR, "logs")
+os.makedirs(LOGS_DIR, exist_ok=True)
+LOG_FILE = os.path.join(LOGS_DIR, "korean_event_watcher.log")
 
 # === その他の設定 ===
 # データベース関連
@@ -259,4 +271,3 @@ RETRY_DELAY = 5  # リトライ間隔（秒）
 TRANSLATE_TO_JAPANESE = True
 SUMMARIZE_CONTENT = True
 MAX_SUMMARY_LENGTH = 200  # 要約の最大文字数
-
